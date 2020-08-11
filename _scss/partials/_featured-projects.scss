@@ -2,6 +2,8 @@
   a:after {
     display: none;
   }
+}
+
   .project {
     display: flex;
     margin-bottom: 100px;
@@ -25,7 +27,7 @@
       margin-bottom: 0;
     }
     &__pic {
-      max-width: 700px;
+      width: 200px;
       overflow: visible;
       margin: 0;
       a {
@@ -50,9 +52,10 @@
       }
     }
     &__caption {
-      width: 125px;
+      width: 400px;
       flex-shrink: 0;
       margin-left: 30px;
+
       @include tablet {
         width: 100%;
         margin-top: 25px;
@@ -70,4 +73,3 @@
       line-height: 1.3;
     }
   }
-}

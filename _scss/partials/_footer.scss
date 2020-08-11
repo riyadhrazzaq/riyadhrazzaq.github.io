@@ -13,6 +13,7 @@
     padding: 50px 30px;
   }
   &__copyright {
+    color: $grey;
     font-weight: 700;
     width: 200px;
     @include weird-medium {

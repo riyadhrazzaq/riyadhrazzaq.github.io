@@ -4,15 +4,22 @@
   </h1>
 
   <h2 class="intro__tagline">I'm
-    <span class="name">Brittany Chiang</span>, a design-minded front-end software engineer focused on building beautiful interfaces &amp; experiences
-    <span class="emoji technologist"></span>
+    <span class="name">{{site.name}}</span>, <br>{{ site.description | downcase}}
   </h2>
 
   <h3 class="intro__contact">
     <span>Get in touch </span>
     <span class="emoji pointer"></span>
     <span>
-      <a href="mailto:brittany.chiang@gmail.com" target="_blank" class="highlight-link">brittany.chiang@gmail.com</a>
+      <a href="mailto:{{ site.email }}" target="_blank" class="highlight-link">{{ site.email }}</a>
     </span>
   </h3>
+  <div class="footer__links">
+    {% for link in site.social %}
+    <a href="{{link.url}}" target="_blank" title="{{link.title}}">
+      <span class="text">{{link.title}}</span>
+      <img src="{{site.baseurl}}/img/social/{{link.title}}.svg" alt="{{link.title}}">
+    </a>
+    {% endfor %}
+  </div>
 </header>

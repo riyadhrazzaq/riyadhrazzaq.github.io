@@ -1,0 +1,50 @@
+# best image size is 400x200
+
+- image_url: "/img/featured/kagglekernel.png"
+  name: "Early ICU Prediction for Covid19 Patients"
+  description: 
+    "The model predicts if patients need ICU or not within 12 hours of hospital admission,
+based on their information from the first 6 hours into the admission. This is to assist
+doctors in making the diagnosis early which helps with beds and resource allocation
+during the pandemic.
+
+* Dataset of COVID-19 patients from 3 hospitals in Brazil.
+
+* Basic data analysis to figure out which **features are most important** to make the pre-
+diction.
+
+* Extra features generated from existing features to understand if a patient’s condition
+is stable or not.
+
+* AUC-ROC around **0.85** with a maximum achievement **0.89**."
+
+  url: "https://www.kaggle.com/riyadhrazzaq/early-icu-prediction-w-basic-eda-roc-auc-0-90"
+
+- image_url: "/img/featured/sentiment.png"
+  name: "Sentiment Classifier"
+  description: 
+    "A web app offering sentiment analysis of food reviews using LSTM. 
+
+    * Trained with Keras and API built with Flask
+
+    * Trained on Amazon Food Review Dataset.
+
+    * Training and test accuracy are respectively 0.82 and 0.75
+
+    * Deployed on Heroku."
+  url: "https://sentiment-analyzer-nlp.herokuapp.com/"
+
+- image_url: "/img/featured/seeongithub.png"
+  name: "Bengali Tag Suggestion System"
+  description: 
+    "Deep neural network based keyword suggestion system specifically for Bangla News
+Documents. Part of undergraduate thesis.
+
+* Trained a dataset of around 4M Bengali news article and title.
+
+* LSTM layer with word embedding as features.
+
+* Dealt with dataset bias with class weights.
+
+* The model achieved about 69% accuracy on user survey."
+  url: "https://github.com/riyadhrazzaq/bengali-tag-suggestion"

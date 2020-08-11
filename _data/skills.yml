@@ -1,33 +1,25 @@
 languages:
-  - item: JavaScript (ES6)
-  - item: TypeScript
-  - item: HTML
-  - item: CSS/Sass
   - item: Python
+  - item: C++
+  - item: JavaScript
+  - item: CSS
   - item: SQL
-  - item: R
+  - item: HTML
 
 frameworks:
-  - item: Ember & Glimmer
-  - item: React
-  - item: Jekyll
-  - item: Node
-  - item: D3
-  - item: Wordpress
-  - item: Timber
+  - item: Pytorch
+  - item: Flask
+  - item: Sci-kit Learn
 
-tools:
+others:
   - item: Bash
-  - item: Git & Github
-  - item: Gulp & Grunt
-  - item: Chrome DevTools
-  - item: Postman
+  - item: Git
+  - item: Heroku
   - item: MongoDB
+  - item: Jira
 
-design:
-  - item: Sketch
-  - item: InDesign
-  - item: InVision
-  - item: Prototyping
-  - item: Wireframing
-  - item: User Testing
+
+softskills:
+  - item: Self-starter
+  - item: Eager to learn
+  - item: Passionate about new techs
