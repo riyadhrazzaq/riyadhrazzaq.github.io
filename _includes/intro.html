@@ -13,12 +13,12 @@
     <span>
       <a href="mailto:{{ site.email }}" target="_blank" class="highlight-link">{{ site.email }}</a>
     </span>
+    <br>
   </h3>
   <div class="footer__links">
     {% for link in site.social %}
     <a href="{{link.url}}" target="_blank" title="{{link.title}}">
       <span class="text">{{link.title}}</span>
-      <img src="{{site.baseurl}}/img/social/{{link.title}}.svg" alt="{{link.title}}">
     </a>
     {% endfor %}
   </div>

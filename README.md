@@ -1,3 +1,6 @@
+
+This awesome theme is developed by, [github/bchiang7](bchiang7.github.io). Given below is author's original README.
+
 # v3
 
 Third iteration of my personal website built with Jekyll.

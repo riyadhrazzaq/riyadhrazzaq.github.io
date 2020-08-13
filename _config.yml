@@ -21,6 +21,10 @@ social:
   - title: blog
     url: https://riyadhrazzaq.github.io/blog
 
+# WARNING: url of resume might break on repository change
+  - title: resume
+    url: https://riyadhrazzaq.github.io/blog/resume.pdf 
+
 
 # Build settings
 markdown: kramdown
