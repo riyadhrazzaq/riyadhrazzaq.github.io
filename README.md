@@ -1,5 +1,5 @@
 
-This awesome theme is developed by, [github/bchiang7](bchiang7.github.io). Given below is author's original README.
+This awesome theme is developed by, [github/bchiang7](https://bchiang7.github.io). Given below is author's original README.
 
 # v3
 
