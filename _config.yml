@@ -19,11 +19,11 @@ social:
   - title: kaggle
     url: https://kaggle.com/riyadhrazzaq
   - title: blog
-    url: https://riyadhrazzaq.github.io/blog
+    url: https://riyadhrazzaq.github.io/text
 
 # WARNING: url of resume might break on repository change
   - title: resume
-    url: https://riyadhrazzaq.github.io/blog/resume.pdf 
+    url: https://riyadhrazzaq.github.io/resume.pdf 
 
 
 # Build settings
