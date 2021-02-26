@@ -1,25 +1,26 @@
 languages:
   - item: Python
+  - item: Java
   - item: C++
-  - item: JavaScript
-  - item: CSS
   - item: SQL
   - item: HTML
 
 frameworks:
-  - item: Pytorch
+  - item: Spring Boot
+  - item: FastAPI
   - item: Flask
   - item: Sci-kit Learn
+  - item: Numpy
+  - item: Pandas
 
 others:
   - item: Bash
   - item: Git
   - item: Heroku
-  - item: MongoDB
-  - item: Jira
+  - item: Redmine
 
 
 softskills:
   - item: Self-starter
   - item: Eager to learn
-  - item: Passionate about new techs
+  - item: Passionate and open to technologies

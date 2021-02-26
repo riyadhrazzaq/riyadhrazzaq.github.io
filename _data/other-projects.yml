@@ -4,23 +4,6 @@
   description: Trained on MovieLens 100K dataset, this collaborative filtering model can recommend movies based on user to user correlation.
     <ul><li>Implemented non-negative matrix factorization from scratch with Numpy</li></ul>
 
-- name: Hyperdrive
-  url: https://github.com/riyadhrazzaq/hyperdrive
-  code: https://github.com/riyadhrazzaq/hyperdrive
-  description: An infinite runner game made for desktop and later ported to Android.
-  used:
-    - thing: C#
-    - thing: Unity Game Engine
-
-- name: Temp Note
-  url: https://github.com/riyadhrazzaq/tempnote
-  code: https://github.com/riyadhrazzaq/tempnote
-  description: An android note app with CRUD operation and firebase sync.
-  used:
-    - thing: Java
-    - thing: Android Studio
-    - thing: Google Firebase API
-
 - name: Frontpage
   url: https://abdurrazzaq.pythonanywhere.com
   code: https://github.com/riyadhrazzaq/frontpage
@@ -28,4 +11,21 @@
   used:
     - thing: Python
     - thing: Flask
+    - thing: Bootstrap
+
+- name: Corona Fact Checker
+  url: https://abdurrazzaq.pythonanywhere.com
+  code: https://github.com/riyadhrazzaq/frontpage
+  description: "Along with a few researchers, contributed to a machine-learning based COVID-19 related fact checking system. It is designed to identify and extract individual Facebook posts and then show a report on its authenticity. The followings were my contributions-
+<ul><li> Query to Database similarity by using Word Embedding with Gensim. </li> 
+
+<li> Maintaining and partially designing MongoDB database on Heroku.</li>
+
+<li> Creating Flask API to communicate with Chrome Browser Extension.</li>
+
+<li> Creating a popup for Facebook that alerts users with the latest viral fake-news.</li></ul>
+  "
+  used:
+    - thing: Python
+    - thing: JavaScript
     - thing: Bootstrap
