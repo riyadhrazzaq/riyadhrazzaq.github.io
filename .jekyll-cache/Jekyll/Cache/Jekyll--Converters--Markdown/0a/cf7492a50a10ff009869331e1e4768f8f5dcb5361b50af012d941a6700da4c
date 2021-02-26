@@ -1,0 +1,8 @@
+I"!<p>A web app offering sentiment analysis of food reviews using LSTM.</p>
+<ul>
+  <li>Trained with Keras and API built with Flask</li>
+  <li>Trained on Amazon Food Review Dataset.</li>
+  <li>Training and test accuracy are respectively 0.82 and 0.75</li>
+  <li>Deployed on Heroku.</li>
+</ul>
+:ET
