@@ -1,4 +1,8 @@
 # best image size is 400x200
+- image_url: "/img/featured/sqlcsvsql.png"
+  name: "SQLCSVSQL"
+  description: "A Simple Command Line Utility for converting SQL INSERT statements to CSV and vice versa."
+  url: "https://github.com/riyadhrazzaq/sqlcsvsql"
 
 - image_url: "/img/featured/kagglekernel.png"
   name: "Early ICU Prediction for Covid19 Patients"
