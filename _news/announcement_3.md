@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-I have joined [BracIT](https://cmed.com.bd/) as a Software Engineer :smiley:
+I have joined [BracIT](https://cmed.com.bd/) as a Software Engineer.
