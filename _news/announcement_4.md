@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-I have received an Erasmus Mundus scholarship to study in the master's in [LCT](https://lct-master.org/) programme! :books: :smiley:
+I have received an Erasmus Mundus scholarship to study in the master\'s in [LCT](https://lct-master.org/) programme! :books: :smiley:
