@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-I have started a research internship on Multimodal LLMs at [Ixa](https://ixa.eus/) under the supervision of [Professor Eneko Agirre](https://eagirre.github.io/)
+I have started a research internship on Multimodal LLMs at [Ixa](https://www.ixa.eus/) under the supervision of [Professor Eneko Agirre](https://eagirre.github.io/)
