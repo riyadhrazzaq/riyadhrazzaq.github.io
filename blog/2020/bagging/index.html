@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"> <html><body> <p>Bagging, random forest, and boosting are statistical approach to further enhance already available algorithms. They all seem to deal with multiple training of a models on the samples from one dataset. Let’s look at the idea behind these.</p> <h1 id="bagging">Bagging</h1> <p>Consider a decision tree. When I split a dataset, and fit two distinct decision tree on those two halves, it will give different outputs. Meaning, our models will have high variance. Bagging or Bootstrap Aggragation comes from this problem. It is a general purpose approach for reducing the variance of models.</p> <p>Theoretically, averaging samples reduces the variance. So, to solve the problem above, we can just train multiple models, get their predictions, average them, and voila! This is what bagging is. But how can we get multiple dataset though? We use <a href="https://en.wikipedia.org/wiki/Bootstrapping_%28statistics%29" rel="external nofollow noopener" target="_blank">bootstrap</a> for that. Bootstrap will generate B different training datasets from one single dataset. We will train on \(b_{th}\) dataset to get \(f_b(x)\). When producing prediction, we will do average of all the \(f_b(x)\). For a single sample \(x\), the equation stands,</p> \[\hat{f}_{bag}(x) = \frac{1}{B} \sum_{b=1}^{B} f_b(x)\] <h2 id="implementation-in-python">Implementation in Python</h2> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="n">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_regression</span><span class="p">,</span> <span class="n">make_classification</span>
+<span class="kn">from</span> <span class="n">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">BaggingRegressor</span><span class="p">,</span> <span class="n">AdaBoostClassifier</span>
+<span class="kn">from</span> <span class="n">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeRegressor</span><span class="p">,</span> <span class="n">DecisionTreeClassifier</span>
+<span class="kn">from</span> <span class="n">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
+<span class="kn">import</span> <span class="n">importlib</span>
+</code></pre></div></div> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Bagging</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">modelName</span><span class="o">=</span><span class="sh">'</span><span class="s">sklearn.linear_model.LinearRegression</span><span class="sh">'</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">
+        params
+        ------
+        B: int. 
+            B separate datasets will be generated.
+        
+        modelName: str. 
+            A sklearn Estimator for regression. Module name and model name must be separated by dot(.). Default: </span><span class="sh">"</span><span class="s">sklearn.linear_model.LinearRegressor</span><span class="sh">"</span><span class="s">
+        
+        returns
+        -------
+        
+        </span><span class="sh">"""</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">B</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">modelName</span> <span class="o">=</span> <span class="n">modelName</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">.</span><span class="sh">"</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">
+        Fits B model to B datasets.
+        
+        params
+        ------
+        X, y: typical input ndarray.
+        </span><span class="sh">"""</span>
+        <span class="n">nSamples</span><span class="p">,</span> <span class="n">nFeats</span> <span class="o">=</span> <span class="n">X</span><span class="p">.</span><span class="n">shape</span>
+        <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nSamples</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">B</span><span class="p">,</span> <span class="n">nSamples</span><span class="p">))</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="p">.</span><span class="nf">import_module</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">modelName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="sh">"</span><span class="s">.</span><span class="sh">"</span><span class="o">+</span><span class="n">self</span><span class="p">.</span><span class="n">modelName</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">modelContainer</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">B</span><span class="p">):</span>
+            <span class="n">estimator</span> <span class="o">=</span> <span class="nf">eval</span><span class="p">(</span><span class="sh">'</span><span class="s">self.module.</span><span class="sh">'</span><span class="o">+</span><span class="n">self</span><span class="p">.</span><span class="n">modelName</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="sh">"</span><span class="s">()</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">estimator</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">])</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">modelContainer</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">self</span>
+    
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">
+        Averages outputs from B model to predict each observations.
+        
+        params
+        ------
+        X: typical input ndarray.
+        </span><span class="sh">"""</span>
+        <span class="n">nSamples</span><span class="p">,</span> <span class="n">nFeats</span> <span class="o">=</span> <span class="n">X</span><span class="p">.</span><span class="n">shape</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="n">nSamples</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">B</span><span class="p">))</span> <span class="c1"># output for each model is a column vector. output for each sample is row vector
+</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">B</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">modelContainer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">Y</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        
+        <span class="n">y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">B</span>
+        
+        <span class="k">return</span> <span class="n">y</span>
+</code></pre></div></div> <h2 id="trying-out-the-model">Trying out the model</h2> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nf">make_regression</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                       <span class="n">n_informative</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_targets</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                       <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">X</span><span class="p">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="p">.</span><span class="n">shape</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>((100, 4), (100,))
+</code></pre></div></div> <p>sklearn’s model</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LinearRegression</span>
+<span class="n">regr</span> <span class="o">=</span> <span class="nc">BaggingRegressor</span><span class="p">(</span><span class="n">base_estimator</span><span class="o">=</span><span class="nc">LinearRegression</span><span class="p">(),</span>
+                        <span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">).</span><span class="nf">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">regr</span><span class="p">.</span><span class="nf">predict</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([1.54321e-15])
+</code></pre></div></div> <p>Our Model</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bag</span> <span class="o">=</span> <span class="nc">Bagging</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">bag</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+<span class="n">bag</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]]))</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array([6.99440506e-16])
+</code></pre></div></div> <p>Nice!</p> <h1 id="references">References</h1> <ol> <li>Freund, Yoav, and Robert E. Schapire. “A desicion-theoretic generalization of on-line learning and an application to boosting.” European conference on computational learning theory. Springer, Berlin, Heidelberg, 1995.</li> <li>Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The elements of statistical learning: data mining, inference, and prediction. Springer Science &amp; Business Media, 2009.</li> <li>James, Gareth, et al. An introduction to statistical learning. Vol. 112. New York: springer, 2013.</li> </ol> </body></html>

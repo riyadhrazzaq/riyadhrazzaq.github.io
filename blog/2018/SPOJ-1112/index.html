@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"> <html><body> <h2 id="problem-statement"><a href="http://www.spoj.com/problems/NSTEPS/" rel="external nofollow noopener" target="_blank">Problem Statement</a></h2> <h2 id="explanation">Explanation</h2> <p>This might seem like a math problem. But it’s not. There’s a pattern in here. Firstly, figure out when output has no number. If you can figure it out then try to recognise the relation of the output with co-ordinates (x, y)</p> <h2 id="code">Code</h2> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#include&lt;stdio.h&gt;
+int main()
+{
+    int t,x,y;
+    scanf("%d",&amp;t);
+    while(t--&amp;&amp;t&gt;=0)
+    {
+        scanf("%d%d",&amp;x,&amp;y);
+        if(y==x||y==x-2)
+        {
+            if(x%2==0) printf("%d\n",x+y);
+            else printf("%d\n",x+y-1);
+        }
+        else
+        {
+            printf("No Number\n");
+        }
+    }
+
+}
+</code></pre></div></div> </body></html>

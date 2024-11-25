@@ -1,0 +1,568 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"> <html><body> <h1>Table of Contents<span class="tocSkip"></span> </h1> <div class="toc"><ul class="toc-item"> <li><span><a href="#binary-classification" data-toc-modified-id="Binary-Classification-1"><span class="toc-item-num">1  </span>Binary Classification</a></span></li> <li><span><a href="#multiclass-classification" data-toc-modified-id="Multiclass-Classification-2"><span class="toc-item-num">2  </span>Multiclass Classification</a></span></li> <li> <span><a href="#3-multilabel-multiclass-classification" data-toc-modified-id="3-Multilabel-Multiclass-3"><span class="toc-item-num">3  </span>Multilabel Multiclass Classification</a></span><ul class="toc-item"> <li><span><a href="#31-example-based-metrics" data-toc-modified-id="3.1-Example-based-Metrics-3.1"><span class="toc-item-num">3.1  </span>Example based Metrics</a></span></li> <li><span><a href="#32-label-based-metrics" data-toc-modified-id="3.2-Label-based-Metrics-3.2"><span class="toc-item-num">3.2  </span>Label based Metrics</a></span></li> </ul> </li> <li><span><a href="#references" data-toc-modified-id="References-4"><span class="toc-item-num">4  </span>References</a></span></li> </ul></div> <p>Notes</p> <p><strong>Micro</strong>. Calculate metrics globally by counting the total true positives, false negatives and false positives. This takes label imbalance into account.</p> <p><strong>Macro</strong>. Calculate metrics for each label, and find their unweighted mean. This does not take label imbalance into account.</p> <p><strong>Weighted</strong>. Calculate metrics for each label, and find their average weighted by support (the number of true instances for each label). This alters ‘macro’ to account for label imbalance.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="n">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span> <span class="k">as</span> <span class="n">mt</span>
+<span class="kn">import</span> <span class="n">random</span>
+<span class="n">random</span><span class="p">.</span><span class="nf">seed</span><span class="p">(</span><span class="mi">133</span><span class="p">)</span>
+</code></pre></div></div> <h1 id="binary-classification">Binary Classification</h1> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ytrue</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># Ground Truth
+</span><span class="n">yhat</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># Prediction
+</span>
+<span class="k">def</span> <span class="nf">confusion</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">fp</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">tn</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">fn</span> <span class="o">=</span> <span class="mi">0</span> 
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">ytrue</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># tn
+</span>            <span class="n">tn</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># tp
+</span>            <span class="n">tp</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># fn
+</span>            <span class="n">fn</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># fp
+</span>            <span class="n">fp</span><span class="o">+=</span><span class="mi">1</span>
+        
+    <span class="k">return</span> <span class="p">[</span><span class="n">tn</span><span class="p">,</span><span class="n">fp</span><span class="p">,</span><span class="n">fn</span><span class="p">,</span><span class="n">tp</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">confusion_matrix</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Ensure: |TN FP|
+            |     | 
+            |FN TP|
+    </span><span class="sh">"""</span>
+    <span class="n">tn</span><span class="p">,</span><span class="n">fp</span><span class="p">,</span><span class="n">fn</span><span class="p">,</span><span class="n">tp</span> <span class="o">=</span> <span class="nf">confusion</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([[</span><span class="n">tn</span><span class="p">,</span><span class="n">fp</span><span class="p">],[</span><span class="n">fn</span><span class="p">,</span><span class="n">tp</span><span class="p">]])</span>
+
+
+<span class="k">def</span> <span class="nf">accuracy</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Require: ytrue, yhat. ndarray of shape (N,1). Each row is for one sample. Output can only be either 0 or 1.
+    Ensure: the percentage of matches between y_true and y_hat
+    </span><span class="sh">"""</span>
+    
+    <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">ytrue</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">correct</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">correct</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">ytrue</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Require: ytrue, yhat. ndarray of shape (N,1). Each row is for one sample.
+    Ensure: Precision. The rate of false positives. Out of all the predicted positives, how many are actually positives.
+    Application: when incorrectly labelling a spam as NOT SPAM is fine but labelling an important mail as SPAM is worse.
+    </span><span class="sh">"""</span>
+    <span class="n">tn</span><span class="p">,</span><span class="n">fp</span><span class="p">,</span><span class="n">fn</span><span class="p">,</span><span class="n">tp</span> <span class="o">=</span> <span class="nf">confusion</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span>
+    <span class="nf">return </span><span class="p">(</span><span class="n">tp</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">tp</span><span class="o">+</span><span class="n">fp</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Require: ytrue, yhat. ndarray of shape (N,1). Each row is for one sample.
+    Ensure: Recall. The rate of false positives. Out of all the actual positives, how many are actually predicted positives.
+    Application: how many is lablled as SPAM out of all actuall spams.
+    </span><span class="sh">"""</span>
+    <span class="n">tn</span><span class="p">,</span><span class="n">fp</span><span class="p">,</span><span class="n">fn</span><span class="p">,</span><span class="n">tp</span> <span class="o">=</span> <span class="nf">confusion</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span>
+    <span class="nf">return </span><span class="p">(</span><span class="n">tp</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">tp</span><span class="o">+</span><span class="n">fn</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">f1</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Require: ytrue, yhat. ndarray of shape (N,1). Each row is for one sample.
+    Ensure: f1-score. Harmonic mean of precision and recall.
+    </span><span class="sh">"""</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span>
+    <span class="nf">return </span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">r</span><span class="o">*</span><span class="n">p</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">r</span><span class="o">+</span><span class="n">p</span><span class="p">)))</span>
+
+<span class="c1"># --------------- test ------------------#
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; confusion_matrix </span><span class="se">\n</span><span class="s"> Custom: </span><span class="se">\n</span><span class="sh">"</span><span class="p">,</span><span class="nf">confusion_matrix</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="sh">"</span><span class="se">\n</span><span class="s">sklearn: </span><span class="se">\n</span><span class="sh">"</span><span class="p">,</span><span class="n">mt</span><span class="p">.</span><span class="nf">confusion_matrix</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Accuracy </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">accuracy</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">accuracy_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Precision </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">precision_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Recall </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">recall_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; f1 score </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">f1</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">f1_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)))</span>
+
+
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;&gt;&gt; confusion_matrix 
+ Custom: 
+ [[1 2]
+ [1 2]] 
+sklearn: 
+ [[1 2]
+ [1 2]]
+&gt;&gt;&gt; Accuracy 
+ Custom: 0.500000, sklearn: 0.500000
+&gt;&gt;&gt; Precision 
+ Custom: 0.500000, sklearn: 0.500000
+&gt;&gt;&gt; Recall 
+ Custom: 0.666667, sklearn: 0.666667
+&gt;&gt;&gt; f1 score 
+ Custom: 0.571429, sklearn: 0.571429
+</code></pre></div></div> <h1 id="multiclass-classification">Multiclass Classification</h1> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ytrue</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">50</span><span class="p">)]</span> <span class="c1"># 3 classes: 0,1,2
+</span><span class="n">yhat</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">50</span><span class="p">)]</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">ytrue</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">yhat</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">accuracy</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Require: ytrue, yhat. ndarray of shape (N,1). Each row is for one sample. Output can only be 0 to N-1, where N is the number of classes.
+    Ensure: the percentage of matches between y_true and y_hat
+    </span><span class="sh">"""</span>
+    
+    <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">ytrue</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">correct</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">correct</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">ytrue</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">confusion_matrix</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+                predicted
+              0     1     2
+           0 |              |
+    truths 1 |              |
+           2 |              |
+    </span><span class="sh">"""</span>
+    
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">unique</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">concatenate</span><span class="p">((</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">classes</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">ytrue</span><span class="p">)):</span>
+        <span class="n">matrix</span><span class="p">[</span><span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">matrix</span><span class="p">.</span><span class="nf">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">,</span><span class="n">return_class</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="nf">confusion_matrix</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">unique</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">concatenate</span><span class="p">((</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">classes</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">ytrue</span><span class="p">)</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="p">[]</span> 
+    <span class="n">fp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+        <span class="n">tp</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">fp</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="nf">sum</span><span class="p">([</span><span class="n">matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">])</span><span class="o">-</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="n">average</span> <span class="o">==</span> <span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="n">sum_tp</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">tp</span><span class="p">)</span>
+        <span class="n">sum_tp_fp</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">tp</span><span class="o">+</span><span class="n">fp</span><span class="p">)</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="n">sum_tp</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">sum_tp_fp</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">average</span> <span class="o">==</span> <span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="n">pre_class</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">/</span><span class="nf">float</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span><span class="n">fp</span><span class="p">)]</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">pre_class</span><span class="p">)</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">average</span> <span class="o">==</span> <span class="sh">'</span><span class="s">weighted</span><span class="sh">'</span><span class="p">:</span>
+        <span class="n">pre_class</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">/</span><span class="nf">float</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span><span class="n">fp</span><span class="p">)]</span>
+        <span class="n">true_instances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+                <span class="n">temp</span><span class="o">+=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">true_instances</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        
+        <span class="n">pre</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="n">p</span><span class="o">*</span><span class="n">s</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">s</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">pre_class</span><span class="p">,</span><span class="n">true_instances</span><span class="p">)])</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">return_class</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">and</span> <span class="n">average</span><span class="o">!=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pre</span><span class="p">,</span><span class="n">pre_class</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pre</span>
+    
+    
+    
+<span class="k">def</span> <span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">,</span><span class="n">return_class</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">return_support</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="n">matrix</span> <span class="o">=</span> <span class="nf">confusion_matrix</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">unique</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">concatenate</span><span class="p">((</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">classes</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">ytrue</span><span class="p">)</span>
+    
+    <span class="n">tp</span> <span class="o">=</span> <span class="p">[]</span> 
+    <span class="n">fn</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+        <span class="n">tp</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">fn</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="nf">sum</span><span class="p">([</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">])</span><span class="o">-</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="n">average</span> <span class="o">==</span> <span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">all tp / all (tp+fn)</span><span class="sh">"""</span>
+        <span class="n">sum_tp</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">tp</span><span class="p">)</span>
+        <span class="n">sum_tp_fn</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">tp</span><span class="o">+</span><span class="n">fn</span><span class="p">)</span>
+        <span class="n">rec</span> <span class="o">=</span> <span class="n">sum_tp</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">sum_tp_fn</span><span class="p">)</span>
+        
+    <span class="k">elif</span> <span class="n">average</span> <span class="o">==</span> <span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">all pre / number of class. AKA simple average</span><span class="sh">"""</span>
+        <span class="n">rec_class</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">/</span><span class="nf">float</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span><span class="n">fn</span><span class="p">)]</span>
+        <span class="n">rec</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">rec_class</span><span class="p">)</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        
+    <span class="k">elif</span> <span class="n">average</span> <span class="o">==</span> <span class="sh">'</span><span class="s">weighted</span><span class="sh">'</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">all (pre * support) / number of samples</span><span class="sh">"""</span>
+        <span class="n">rec_class</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">/</span><span class="nf">float</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span><span class="n">fn</span><span class="p">)]</span>
+        <span class="n">true_instances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+                <span class="n">temp</span><span class="o">+=</span> <span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">true_instances</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        
+        <span class="n">rec</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="n">p</span><span class="o">*</span><span class="n">s</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">s</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">rec_class</span><span class="p">,</span><span class="n">true_instances</span><span class="p">)])</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">return_class</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">and</span> <span class="n">average</span><span class="o">!=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rec</span><span class="p">,</span><span class="n">rec_class</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rec</span>
+
+<span class="k">def</span> <span class="nf">f1</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Require: ytrue, yhat. ndarray of shape (N,1). Each row is for one sample.
+    Ensure: f1-score. Harmonic mean of precision and recall.
+    </span><span class="sh">"""</span>
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">ytrue</span><span class="p">)</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">unique</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">concatenate</span><span class="p">((</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">classes</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">average</span><span class="o">==</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">)</span>
+        <span class="nf">return </span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">r</span><span class="o">*</span><span class="n">p</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">r</span><span class="o">+</span><span class="n">p</span><span class="p">)))</span>
+    
+    <span class="k">elif</span> <span class="n">average</span><span class="o">==</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">rec_class</span> <span class="o">=</span> <span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="n">average</span><span class="p">,</span><span class="n">return_class</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">pre_class</span> <span class="o">=</span> <span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="p">,</span><span class="n">return_class</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+        
+        <span class="n">f1_class</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">pre_class</span><span class="p">)):</span>
+            <span class="n">f1_class</span><span class="p">.</span><span class="nf">append</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">rec_class</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">pre_class</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">rec_class</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">pre_class</span><span class="p">[</span><span class="n">i</span><span class="p">]))))</span>
+        
+        <span class="n">f1</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">f1_class</span><span class="p">])</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">f1</span>
+    
+    <span class="k">elif</span> <span class="n">average</span> <span class="o">==</span> <span class="sh">'</span><span class="s">weighted</span><span class="sh">'</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">rec_class</span> <span class="o">=</span> <span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="n">average</span><span class="p">,</span><span class="n">return_class</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">pre_class</span> <span class="o">=</span> <span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="p">,</span><span class="n">return_class</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+        
+        <span class="n">f1_class</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">pre_class</span><span class="p">)):</span>
+            <span class="n">f1_class</span><span class="p">.</span><span class="nf">append</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="p">((</span><span class="n">rec_class</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">pre_class</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">rec_class</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">pre_class</span><span class="p">[</span><span class="n">i</span><span class="p">]))))</span>
+        
+        
+        <span class="n">support</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="nf">len</span><span class="p">(</span><span class="n">pre_class</span><span class="p">),</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ytrue</span><span class="p">:</span>
+            <span class="n">support</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+        
+        
+        
+        <span class="n">f1</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="n">f</span><span class="o">*</span><span class="n">s</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span><span class="n">s</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">f1_class</span><span class="p">,</span><span class="n">support</span><span class="p">)])</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">)</span>
+        
+        
+    <span class="k">return</span> <span class="n">f1</span>
+        
+
+<span class="c1"># --------------- test ------------------#
+</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; confusion_matrix </span><span class="se">\n</span><span class="s"> Custom: </span><span class="se">\n</span><span class="sh">"</span><span class="p">,</span><span class="nf">confusion</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="sh">"</span><span class="se">\n</span><span class="s">sklearn: </span><span class="se">\n</span><span class="sh">"</span><span class="p">,</span><span class="n">mt</span><span class="p">.</span><span class="nf">confusion_matrix</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt;Accuracy </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">accuracy</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">accuracy_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Precision Micro </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">precision_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Precision Macro </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">precision_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Precision Weighted </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">weighted</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">precision_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">weighted</span><span class="sh">'</span><span class="p">)))</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Recall Micro </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">recall_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Recall Macro </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">recall_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Recall Weighted </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">weighted</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">recall_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">weighted</span><span class="sh">'</span><span class="p">)))</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; f1 score Micro </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">f1</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">f1_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; f1 score Macro </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">f1</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">f1_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; f1 score weighted </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">f1</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">weighted</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">f1_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">weighted</span><span class="sh">'</span><span class="p">)))</span>
+
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 0, 2, 0, 1, 2, 1, 1, 0, 0, 1, 2, 1, 0, 0, 1, 0, 0, 1, 1, 2, 2, 0, 1, 0, 2, 0, 2, 0, 2, 1, 0, 1, 1, 1, 0, 0, 2, 1, 1]
+[0, 0, 1, 0, 1, 1, 1, 2, 1, 1, 2, 2, 2, 2, 0, 2, 1, 1, 1, 2, 0, 1, 1, 0, 2, 1, 1, 1, 1, 1, 1, 2, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 1]
+&gt;&gt;&gt; confusion_matrix 
+ Custom: 
+ [6, 11, 13, 9] 
+sklearn: 
+ [[ 6  4  5]
+ [10  9  1]
+ [ 3  7  5]]
+&gt;&gt;&gt;Accuracy 
+ Custom: 0.400000, sklearn: 0.400000
+&gt;&gt;&gt; Precision Micro 
+ Custom: 0.400000, sklearn: 0.400000
+&gt;&gt;&gt; Precision Macro 
+ Custom: 0.406778, sklearn: 0.406778
+&gt;&gt;&gt; Precision Weighted 
+ Custom: 0.411100, sklearn: 0.411100
+&gt;&gt;&gt; Recall Micro 
+ Custom: 0.400000, sklearn: 0.400000
+&gt;&gt;&gt; Recall Macro 
+ Custom: 0.394444, sklearn: 0.394444
+&gt;&gt;&gt; Recall Weighted 
+ Custom: 0.400000, sklearn: 0.400000
+&gt;&gt;&gt; f1 score Micro 
+ Custom: 0.400000, sklearn: 0.400000
+&gt;&gt;&gt; f1 score Macro 
+ Custom: 0.395852, sklearn: 0.395852
+&gt;&gt;&gt; f1 score weighted 
+ Custom: 0.401267, sklearn: 0.401267
+</code></pre></div></div> <h1 id="3-multilabel-multiclass-classification">3 Multilabel Multiclass Classification</h1> <h2 id="31-example-based-metrics">3.1 Example based Metrics</h2> <p><strong>Metrics</strong></p> <ul> <li> <code class="language-plaintext highlighter-rouge">exact match ratio</code> aka <code class="language-plaintext highlighter-rouge">subset accuracy</code> Optimal Value: 1</li> <li> <code class="language-plaintext highlighter-rouge">hamming_loss</code> Optimal Value: 0</li> <li><code class="language-plaintext highlighter-rouge">Accuracy Exam</code></li> <li><code class="language-plaintext highlighter-rouge">Precision Exam</code></li> <li><code class="language-plaintext highlighter-rouge">Recall Exam</code></li> <li><code class="language-plaintext highlighter-rouge">F1 exam</code></li> </ul> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ytrue</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+<span class="n">yhat</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+
+<span class="k">def</span> <span class="nf">subset_accuracy</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">match</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nf">sum</span><span class="p">(</span><span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">==</span><span class="n">N</span><span class="p">:</span>
+            <span class="n">match</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">match</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">hamming_loss</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+    
+    <span class="n">xor</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">ytrue</span><span class="o">!=</span><span class="n">yhat</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">xor</span><span class="o">/</span><span class="nf">float</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="n">SAMPLE</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">accuracy_exam</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Accuracy for each instance is defined as the proportion of the predicted CORRECT labels 
+    to the total number (predicted and actual) of labels for that instance. 
+    Overall accuracy is the average across all instances.
+    A label is predicted if its value is 1.
+    </span><span class="sh">"""</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">):</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">union</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">intersection</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">union</span><span class="o">+=</span><span class="mi">1</span>
+                
+        <span class="k">if</span> <span class="n">union</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">accuracy</span> <span class="o">+=</span> <span class="p">(</span><span class="n">intersection</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">union</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">accuracy</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">precision_exam</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Precision is average over the proportion of predicted correct labels to the total number of actual labels.
+    </span><span class="sh">"""</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">precision_sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">):</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">actual</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">intersection</span><span class="o">+=</span><span class="mi">1</span>
+                
+        <span class="k">if</span> <span class="n">actual</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">precision_sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">intersection</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">actual</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">precision_sum</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">recall_exam</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Proportion of predicted correct labels to the total number of predicted labels, averaged over all instances.
+    </span><span class="sh">"""</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">recall_sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">):</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">predicted_labels</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">intersection</span><span class="o">+=</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">predicted_labels</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">recall_sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">intersection</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">predicted_labels</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">recall_sum</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">f1_exam</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">):</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">SAMPLE</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">f1_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">):</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">predicted</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">actual</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">intersection</span><span class="o">+=</span><span class="mi">1</span>
+                
+        <span class="n">f1_sum</span> <span class="o">=</span> <span class="n">f1_sum</span> <span class="o">+</span> <span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">intersection</span><span class="p">)</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">predicted</span><span class="o">+</span><span class="n">actual</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">f1_sum</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">SAMPLE</span><span class="p">)</span>
+
+<span class="c1"># sklearn returns "subset_accuracy" from accuracy_score() if ytrue,yhat are multilabel
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Subset Accuracy </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">subset_accuracy</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">accuracy_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)))</span> 
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Hamming Loss </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">hamming_loss</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">hamming_loss</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)))</span> 
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Accuracy Exam </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %s</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">accuracy_exam</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">))</span> 
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Precision Exam </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %s</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">precision_exam</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Recall Exam </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %s</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">recall_exam</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; F1 Exam </span><span class="se">\n</span><span class="s"> Custom: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">f1_exam</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">))</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;&gt;&gt; Subset Accuracy 
+ Custom: 0.333333, sklearn: 0.333333
+&gt;&gt;&gt; Hamming Loss 
+ Custom: 0.166667, sklearn: 0.166667
+&gt;&gt;&gt; Accuracy Exam 
+ Custom: 0.555556, sklearn: doesn't have accuracy_exam
+&gt;&gt;&gt; Precision Exam 
+ Custom: 0.555556, sklearn: doesn't have precision_exam
+&gt;&gt;&gt; Recall Exam 
+ Custom: 0.666667, sklearn: doesn't have recall_exam
+&gt;&gt;&gt; F1 Exam 
+ Custom: 0.600000, sklearn: doesn't have f1_exam
+</code></pre></div></div> <h2 id="32-label-based-metrics">3.2 Label based Metrics</h2> <p><strong>Metrics</strong></p> <ul> <li> <code class="language-plaintext highlighter-rouge">Confusion Matrix</code> for each label</li> <li><code class="language-plaintext highlighter-rouge">Precision Macro,Micro</code></li> <li><code class="language-plaintext highlighter-rouge">Recall Macro,Micro</code></li> <li><code class="language-plaintext highlighter-rouge">F1-score Macro,Micro</code></li> <li><code class="language-plaintext highlighter-rouge">F-beta Macro,Micro</code></li> </ul> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ytrue</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+<span class="n">yhat</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+<span class="k">def</span> <span class="nf">confusion_matrix_labelwise</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Returns labelwise tp,fp,fn,tp. 
+    </span><span class="sh">"""</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># number of labels
+</span>    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># number of samples
+</span>    <span class="n">confusion</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="n">L</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span> <span class="c1"># list of lists, inner list will contain 0:tn, 1:fp, 2:fn, 3:tp
+</span>    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">L</span><span class="p">):</span>
+            
+            <span class="k">if</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># tp
+</span>                <span class="n">confusion</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+                
+            <span class="k">elif</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># tn
+</span>                <span class="n">confusion</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+                
+            <span class="k">elif</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">!=</span><span class="n">yhat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ytrue</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="c1"># fp
+</span>                <span class="n">confusion</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">confusion</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">verbose</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">TN FP FN TP</span><span class="se">\n</span><span class="sh">'</span><span class="p">,</span><span class="n">confusion</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">confusion</span>   
+
+<span class="k">def</span> <span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">):</span>
+    <span class="n">confusion</span> <span class="o">=</span> <span class="nf">confusion_matrix_labelwise</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span> <span class="c1"># col 0:tn, 1:fp, 2:fn, 3:tp
+</span>    <span class="n">L</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># number of labels
+</span>    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># number of samples
+</span>    
+    <span class="k">if</span> <span class="n">average</span><span class="o">==</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">:</span> <span class="c1"># micro sums everything, then calculates the global metric
+</span>        <span class="n">sums</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">confusion</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">tp</span> <span class="o">=</span> <span class="n">sums</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">tp_fp</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">+</span> <span class="n">sums</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">tp_fp</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">precision</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">tp_fp</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">precision</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">average</span><span class="o">==</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">:</span> <span class="c1"># macro calculates label wise precision, then averages
+</span>        <span class="n">pre</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">L</span><span class="p">):</span>
+            <span class="n">tp</span> <span class="o">=</span> <span class="n">confusion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">tp_fp</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">+</span> <span class="n">confusion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">tp_fp</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">pre</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">tp</span><span class="o">/</span><span class="nf">float</span><span class="p">(</span><span class="n">tp_fp</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pre</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">pre</span><span class="p">)</span><span class="o">/</span><span class="nf">float</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">precision</span>
+
+<span class="k">def</span> <span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">):</span>
+    <span class="n">confusion</span> <span class="o">=</span> <span class="nf">confusion_matrix_labelwise</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span> <span class="c1"># col 0:tn, 1:fp, 2:fn, 3:tp
+</span>    <span class="n">L</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># number of labels
+</span>    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># number of samples
+</span>    
+    <span class="k">if</span> <span class="n">average</span><span class="o">==</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">:</span> <span class="c1"># micro sums everything, then calculates the global metric
+</span>        <span class="n">sums</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">confusion</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">tp</span> <span class="o">=</span> <span class="n">sums</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">tp_fn</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">+</span> <span class="n">sums</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">tp_fn</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">recall</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">tp_fn</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">recall</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">average</span><span class="o">==</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">:</span> <span class="c1"># macro calculates label wise precision, then averages
+</span>        <span class="n">rec</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">L</span><span class="p">):</span>
+            <span class="n">tp</span> <span class="o">=</span> <span class="n">confusion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">tp_fn</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">+</span> <span class="n">confusion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">tp_fn</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">rec</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">tp</span><span class="o">/</span><span class="nf">float</span><span class="p">(</span><span class="n">tp_fn</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rec</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">recall</span> <span class="o">=</span>  <span class="nf">sum</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span><span class="o">/</span><span class="nf">float</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">recall</span>
+
+<span class="k">def</span> <span class="nf">f_beta</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">):</span>
+    <span class="n">confusion</span> <span class="o">=</span> <span class="nf">confusion_matrix_labelwise</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">)</span> <span class="c1"># rows are labels, cols are 0:tn, 1:fp, 2:fn, 3:tp
+</span>    <span class="n">L</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># number of labels
+</span>    <span class="n">N</span> <span class="o">=</span> <span class="n">ytrue</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># number of samples
+</span>    <span class="n">f1</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">average</span><span class="o">==</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="n">f1s</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">L</span><span class="p">):</span>
+            <span class="n">numerator</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">))</span><span class="o">*</span><span class="n">confusion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">denominator</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">))</span><span class="o">*</span><span class="n">confusion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span><span class="o">*</span><span class="n">confusion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">confusion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">denominator</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">f1s</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">numerator</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">denominator</span><span class="p">))</span>
+        <span class="n">f1</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">(</span><span class="n">f1s</span><span class="p">)</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">average</span><span class="o">==</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">:</span>
+        <span class="n">sums</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">confusion</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">tp</span> <span class="o">=</span> <span class="n">sums</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">sums</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="n">sums</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">numerator</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">))</span><span class="o">*</span><span class="n">tp</span>
+        <span class="n">denominator</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">))</span><span class="o">*</span><span class="n">tp</span> <span class="o">+</span> <span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span><span class="o">*</span><span class="n">fn</span> <span class="o">+</span> <span class="n">fp</span>
+        <span class="k">if</span> <span class="n">denominator</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">denominator</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f1</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Precision Micro </span><span class="se">\n</span><span class="s"> Custom:</span><span class="se">\n</span><span class="sh">"</span><span class="p">,</span><span class="nf">confusion_matrix_labelwise</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span><span class="sh">'</span><span class="se">\n</span><span class="sh">'</span><span class="p">,</span><span class="sh">'</span><span class="s">sklearn: </span><span class="se">\n</span><span class="sh">'</span><span class="p">,</span><span class="n">mt</span><span class="p">.</span><span class="nf">multilabel_confusion_matrix</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Precision Micro </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">precision_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">,</span><span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Precision Macro </span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">precision</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">precision_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">,</span><span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Recall Micro</span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">),</span><span class="n">mt</span><span class="p">.</span><span class="nf">recall_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">,</span><span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; Recall Macro</span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">recall</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">recall_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">,</span><span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; fbeta Macro</span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">f_beta</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">fbeta_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">macro</span><span class="sh">'</span><span class="p">,</span><span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">&gt;&gt;&gt; fbeta Micro</span><span class="se">\n</span><span class="s"> Custom: %f, sklearn: %f</span><span class="sh">"</span><span class="o">%</span><span class="p">(</span><span class="nf">f_beta</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">),</span> <span class="n">mt</span><span class="p">.</span><span class="nf">fbeta_score</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">yhat</span><span class="p">,</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">average</span><span class="o">=</span><span class="sh">'</span><span class="s">micro</span><span class="sh">'</span><span class="p">,</span><span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;&gt;&gt; Precision Micro 
+ Custom:
+ [[2. 0. 0. 1.]
+ [2. 0. 1. 0.]
+ [1. 0. 1. 1.]
+ [1. 0. 0. 2.]] 
+ sklearn: 
+ [[[2 0]
+  [0 1]]
+
+ [[2 0]
+  [1 0]]
+
+ [[1 0]
+  [1 1]]
+
+ [[1 0]
+  [0 2]]]
+&gt;&gt;&gt; Precision Micro 
+ Custom: 1.000000, sklearn: 1.000000
+&gt;&gt;&gt; Precision Macro 
+ Custom: 0.750000, sklearn: 0.750000
+&gt;&gt;&gt; Recall Micro
+ Custom: 0.666667, sklearn: 0.666667
+&gt;&gt;&gt; Recall Macro
+ Custom: 0.625000, sklearn: 0.625000
+beta:  1 &lt;class 'int'&gt;
+&gt;&gt;&gt; fbeta Macro
+ Custom: 0.666667, sklearn: 0.666667
+beta:  1 &lt;class 'int'&gt;
+&gt;&gt;&gt; fbeta Micro
+ Custom: 0.800000, sklearn: 0.800000
+</code></pre></div></div> <h1 id="references">References</h1> <ol> <li>https://www.youtube.com/watch?v=FAr2GmWNbT0</li> <li>https://datascience.stackexchange.com/a/24051</li> <li>Scikit-learn: Machine Learning in Python, Pedregosa et al., JMLR 12, pp. 2825-2830, 2011.</li> <li>M. Zhang and Z. Zhou, “A Review on Multi-Label Learning Algorithms,” in IEEE Transactions on Knowledge and Data Engineering, vol. 26, no. 8, pp. 1819-1837, Aug. 2014.</li> <li>Sorower, Mohammad S. “A literature survey on algorithms for multi-label learning.” Oregon State University, Corvallis 18 (2010): 1-25.</li> </ol> </body></html>

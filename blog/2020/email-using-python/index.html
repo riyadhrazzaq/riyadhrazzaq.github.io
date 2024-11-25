@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"> <html><body> <h1 id="hello-world-in-email">Hello World in Email</h1> <p>Python has new <code class="language-plaintext highlighter-rouge">EmailMessage</code> class in <code class="language-plaintext highlighter-rouge">email</code> module. Here are a few examples using it.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">smtplib</span>
+<span class="kn">from</span> <span class="n">email.message</span> <span class="kn">import</span> <span class="n">EmailMessage</span>
+<span class="n">sender_email</span> <span class="o">=</span> <span class="sh">"</span><span class="s">sender@mail.com</span><span class="sh">"</span>
+<span class="n">receiver_email</span> <span class="o">=</span> <span class="sh">"</span><span class="s">receiver@mail.com</span><span class="sh">"</span>
+</code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">EmailMessage</code> class only creates, manipulates and manages each mail we send, <code class="language-plaintext highlighter-rouge">smtplib</code> is the one that actually sends it.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">msg</span> <span class="o">=</span> <span class="nc">EmailMessage</span><span class="p">()</span>
+<span class="nf">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>'\n'
+</code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">str(msg)</code> outputs a readable format of the msg object. For now our message is empty. Let’s add headers. Headers are key, value pair that stores information about our message. For example, <code class="language-plaintext highlighter-rouge">subject</code>, <code class="language-plaintext highlighter-rouge">from</code>, <code class="language-plaintext highlighter-rouge">to</code>, <code class="language-plaintext highlighter-rouge">date</code> etc.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">Subject</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">this is test subject</span><span class="sh">"</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">To</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">receiver_email</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">From</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender_email</span>
+<span class="nf">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>'Subject: this is test subject\nTo: receiver@mail.com\nFrom: sender@mail.com\n\n'
+</code></pre></div></div> <p>actual content to the msg object is set through the <code class="language-plaintext highlighter-rouge">set_content</code> method.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">msg</span><span class="p">.</span><span class="nf">set_content</span><span class="p">(</span><span class="sh">"</span><span class="s">Hello World</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div> <p>msg object now looks like this-</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Subject: Hello world in subject
+To: receiver@mail.com
+From: sender@mail.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+
+Hello world inside message. This is known as message body
+
+</code></pre></div></div> <p>We see 3 extra information. Content-Type is type of the msg body. Content-Transfer-Encoding is how the string in message body is encoded. Existance of <code class="language-plaintext highlighter-rouge">MIME-Version: 1.0</code> indicates that this message maintains MIME (Multipurpose Internet Mail Extensions) standard.</p> <h2 id="mime-in-short">MIME in short</h2> <p>MIME basically says that each message body consists of multiple parts. A message is described as maintype and subtype. Generally written as <code class="language-plaintext highlighter-rouge">maintype/subtype</code>, e.g., <code class="language-plaintext highlighter-rouge">text/plain</code>, <code class="language-plaintext highlighter-rouge">text/html</code>, <code class="language-plaintext highlighter-rouge">application/pdf</code>, <code class="language-plaintext highlighter-rouge">image/png</code> etc. These informations are stored in <code class="language-plaintext highlighter-rouge">Content-Type</code> header that we have seen before. These MIME types let’s us attach images, files, html inside a mail. Since a message body can have multiple combination of these, there should be some MIME type that lets us contain any of these inside the body. Those MIME types are known as <code class="language-plaintext highlighter-rouge">multipart/mixed</code>. So, imagine a tree data structure, root <code class="language-plaintext highlighter-rouge">multipart/mixed</code> will contain concrete types such as <code class="language-plaintext highlighter-rouge">text/plain</code> as nodes, and these nodes will contain the actual message or files as leaves.</p> <h2 id="sending-mail-via-smtplib">Sending Mail via SMTPlib</h2> <p>I will use <code class="language-plaintext highlighter-rouge">mailtrap.io</code> as server, because using gmail or microsoft account and sending numerous emails during development may result in marking the account as spam. SMTP requires connecting to an smtp server via specific host and port, and login if necessary. Then we can send fake emails and see them in <code class="language-plaintext highlighter-rouge">mailtrap.io</code>’s inbox.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">smtplib</span><span class="p">.</span><span class="nc">SMTP</span><span class="p">(</span><span class="sh">"</span><span class="s">smtp.mailtrap.io</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2525</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</code></pre></div></div> <p>Message sent! <img src="../assets/images/emails-using-python/0.png" alt="Screenshot_2020-09-26 Mailtrap - Safe Email Testing.png"></p> <p>To do this with gmail or microsoft, we just need to change our username, password, host and port with their given configs which is available online.</p> <h1 id="advance-examples">Advance Examples</h1> <h2 id="text-and-image-in-the-body">Text and Image in the body</h2> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">msg</span> <span class="o">=</span> <span class="nc">EmailMessage</span><span class="p">()</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">Subject</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">text and image in the body</span><span class="sh">"</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">From</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender_email</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">To</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">receiver_email</span>
+<span class="n">msg</span><span class="p">.</span><span class="nf">make_mixed</span><span class="p">()</span>
+
+<span class="nf">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>'Subject: text and image in the body\nFrom: sender@mail.com\nTo: receiver@mail.com\nContent-Type: multipart/mixed; boundary="===============4058359157311941825=="\n\n--===============4058359157311941825==\n\n--===============4058359157311941825==--\n'
+</code></pre></div></div> <p>Content-type says that our msg is now <code class="language-plaintext highlighter-rouge">multipart</code>. But we need subparts to include inside multipart. <code class="language-plaintext highlighter-rouge">email.message.MIMEPart</code> class can be used to create that. We will need two subparts, one for a sample text, and another for a sample image to display.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">email.message</span> <span class="kn">import</span> <span class="n">MIMEPart</span>
+<span class="n">text_part</span> <span class="o">=</span> <span class="nc">MIMEPart</span><span class="p">()</span>
+<span class="n">text_part</span><span class="p">.</span><span class="nf">set_content</span><span class="p">(</span><span class="sh">"</span><span class="s">Hello World</span><span class="sh">"</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="sh">"</span><span class="s">plain</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">image_filepath</span> <span class="o">=</span> <span class="sh">'</span><span class="s">150.png</span><span class="sh">'</span>
+<span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">image_filepath</span><span class="p">,</span> <span class="sh">'</span><span class="s">rb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">img_data</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="nf">read</span><span class="p">()</span>
+
+<span class="n">image_part</span> <span class="o">=</span> <span class="nc">MIMEPart</span><span class="p">()</span>
+<span class="n">image_part</span><span class="p">.</span><span class="nf">set_content</span><span class="p">(</span><span class="n">img_data</span><span class="p">,</span> <span class="n">maintype</span><span class="o">=</span><span class="sh">"</span><span class="s">image</span><span class="sh">"</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="sh">"</span><span class="s">png</span><span class="sh">"</span><span class="p">,</span> <span class="n">disposition</span><span class="o">=</span><span class="sh">"</span><span class="s">inline</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">msg</span><span class="p">.</span><span class="nf">attach</span><span class="p">(</span><span class="n">text_part</span><span class="p">)</span>
+<span class="n">msg</span><span class="p">.</span><span class="nf">attach</span><span class="p">(</span><span class="n">image_part</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">smtplib</span><span class="p">.</span><span class="nc">SMTP</span><span class="p">(</span><span class="sh">"</span><span class="s">smtp.mailtrap.io</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2525</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</code></pre></div></div> <p>Result:</p> <p><img src="../assets/images/emails-using-python/1.png" alt="Screenshot_2020-09-26 Mailtrap - Safe Email Testing(1).png"> <img src="../assets/images/emails-using-python/6.png" alt="Screenshot_2020-09-26 Mailtrap - Safe Email Testing(6).png"></p> <p>Those random seeming string is the image as binary placed inline. But not parsed and presented in color. HTML can do that. We will read the image as byte stream and insert that into the <code class="language-plaintext highlighter-rouge">src</code> of html <code class="language-plaintext highlighter-rouge">&lt;img&gt;</code> tag.</p> <h2 id="image-inline-using-html">Image inline using HTML</h2> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">base64</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="nc">EmailMessage</span><span class="p">()</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">Subject</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Image inline with the help of html</span><span class="sh">"</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">To</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">receiver_email</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">From</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender_email</span>
+<span class="n">msg</span><span class="p">.</span><span class="nf">set_content</span><span class="p">(</span><span class="sh">"</span><span class="s">This will be only shown in text and raw format, HTML won</span><span class="sh">'</span><span class="s">t show this.</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">img_data</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="nf">b64encode</span><span class="p">(</span><span class="nf">open</span><span class="p">(</span><span class="n">image_filepath</span><span class="p">,</span> <span class="sh">"</span><span class="s">rb</span><span class="sh">"</span><span class="p">).</span><span class="nf">read</span><span class="p">()).</span><span class="nf">decode</span><span class="p">()</span>
+
+<span class="n">html_part</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"""</span><span class="se">\
+</span><span class="s">&lt;html&gt;
+ &lt;body&gt;
+    &lt;p&gt;hello world&lt;/p&gt;
+   &lt;img src=</span><span class="sh">"</span><span class="s">data:image/png;base64,</span><span class="si">{</span><span class="n">img_data</span><span class="si">}</span><span class="sh">"</span><span class="s">&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+</span><span class="sh">"""</span>
+
+<span class="n">msg</span><span class="p">.</span><span class="nf">add_alternative</span><span class="p">(</span><span class="n">html_part</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="sh">"</span><span class="s">html</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">smtplib</span><span class="p">.</span><span class="nc">SMTP</span><span class="p">(</span><span class="sh">"</span><span class="s">smtp.mailtrap.io</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2525</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</code></pre></div></div> <p>as we see the long line of text via <code class="language-plaintext highlighter-rouge">set_content</code> was not shown. Only the HTML is shown. This type of message is known as <code class="language-plaintext highlighter-rouge">multipart/alternative</code>, where main content will be in plain text and alternative graphically rich version will be put inside html.</p> <p><img src="../assets/images/emails-using-python/3.png" alt="Screenshot_2020-09-26 Mailtrap - Safe Email Testing(3).png"></p> <p>The same thing can be done with <code class="language-plaintext highlighter-rouge">MIMEPart</code> method too.</p> <h2 id="html-as-mimepart">HTML as MIMEPart</h2> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">msg</span> <span class="o">=</span> <span class="nc">EmailMessage</span><span class="p">()</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">Subject</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Image inline with the help of html</span><span class="sh">"</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">To</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">receiver_email</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">From</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender_email</span>
+
+<span class="n">msg</span><span class="p">.</span><span class="nf">make_mixed</span><span class="p">()</span>
+
+<span class="n">text_part</span> <span class="o">=</span> <span class="nc">MIMEPart</span><span class="p">()</span>
+<span class="n">text_part</span><span class="p">.</span><span class="nf">set_content</span><span class="p">(</span><span class="sh">"</span><span class="s">Hello World</span><span class="sh">"</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="sh">"</span><span class="s">plain</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">msg</span><span class="p">.</span><span class="nf">attach</span><span class="p">(</span><span class="n">text_part</span><span class="p">)</span>
+
+<span class="n">img_data</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="nf">b64encode</span><span class="p">(</span><span class="nf">open</span><span class="p">(</span><span class="n">image_filepath</span><span class="p">,</span> <span class="sh">"</span><span class="s">rb</span><span class="sh">"</span><span class="p">).</span><span class="nf">read</span><span class="p">()).</span><span class="nf">decode</span><span class="p">()</span>
+
+<span class="n">html</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"""</span><span class="se">\
+</span><span class="s">&lt;html&gt;
+ &lt;body&gt;
+    &lt;p&gt;hello world&lt;/p&gt;
+   &lt;img src=</span><span class="sh">"</span><span class="s">data:image/png;base64,</span><span class="si">{</span><span class="n">img_data</span><span class="si">}</span><span class="sh">"</span><span class="s">&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+</span><span class="sh">"""</span>
+
+<span class="n">html_part</span> <span class="o">=</span> <span class="nc">MIMEPart</span><span class="p">()</span>
+<span class="n">html_part</span><span class="p">.</span><span class="nf">set_content</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="sh">'</span><span class="s">html</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">msg</span><span class="p">.</span><span class="nf">attach</span><span class="p">(</span><span class="n">html_part</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">smtplib</span><span class="p">.</span><span class="nc">SMTP</span><span class="p">(</span><span class="sh">"</span><span class="s">smtp.mailtrap.io</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2525</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</code></pre></div></div> <h1 id="attach-files">Attach File(s)</h1> <p>File attachment is done using <code class="language-plaintext highlighter-rouge">add_attachment</code> method of msg. But msg has to be <code class="language-plaintext highlighter-rouge">multipart/mixed</code> because only than it can store message in text, html as well as any other file type in its nodes.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">msg</span> <span class="o">=</span> <span class="nc">EmailMessage</span><span class="p">()</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">Subject</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Image inline with the help of html also has ATTACHMENTS</span><span class="sh">"</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">To</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">receiver_email</span>
+<span class="n">msg</span><span class="p">[</span><span class="sh">'</span><span class="s">From</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender_email</span>
+
+<span class="n">msg</span><span class="p">.</span><span class="nf">make_mixed</span><span class="p">()</span>
+
+<span class="n">img_data</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="nf">b64encode</span><span class="p">(</span><span class="nf">open</span><span class="p">(</span><span class="n">image_filepath</span><span class="p">,</span> <span class="sh">"</span><span class="s">rb</span><span class="sh">"</span><span class="p">).</span><span class="nf">read</span><span class="p">()).</span><span class="nf">decode</span><span class="p">()</span>
+
+<span class="n">html</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"""</span><span class="se">\
+</span><span class="s">&lt;html&gt;
+ &lt;body&gt;
+    &lt;p&gt;hello world&lt;/p&gt;
+   &lt;img src=</span><span class="sh">"</span><span class="s">data:image/png;base64,</span><span class="si">{</span><span class="n">img_data</span><span class="si">}</span><span class="sh">"</span><span class="s">&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+</span><span class="sh">"""</span>
+
+<span class="n">html_part</span> <span class="o">=</span> <span class="nc">MIMEPart</span><span class="p">()</span>
+<span class="n">html_part</span><span class="p">.</span><span class="nf">set_content</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="sh">'</span><span class="s">html</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">msg</span><span class="p">.</span><span class="nf">attach</span><span class="p">(</span><span class="n">html_part</span><span class="p">)</span>
+
+<span class="c1"># image attachment: normal file read in python, than create a multipart
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">image_filepath</span><span class="p">,</span><span class="sh">'</span><span class="s">rb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">only_image</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="nf">read</span><span class="p">()</span>
+
+<span class="n">msg</span><span class="p">.</span><span class="nf">add_attachment</span><span class="p">(</span><span class="n">only_image</span><span class="p">,</span> <span class="n">maintype</span><span class="o">=</span><span class="sh">"</span><span class="s">image</span><span class="sh">"</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="sh">"</span><span class="s">png</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># pdf attachment
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">A Sample PDF.pdf</span><span class="sh">"</span><span class="p">,</span> <span class="sh">'</span><span class="s">rb</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">pdf_file</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="nf">read</span><span class="p">()</span>
+
+<span class="n">msg</span><span class="p">.</span><span class="nf">add_attachment</span><span class="p">(</span><span class="n">pdf_file</span><span class="p">,</span> <span class="n">maintype</span><span class="o">=</span><span class="sh">"</span><span class="s">application</span><span class="sh">"</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="sh">"</span><span class="s">octet-stream</span><span class="sh">"</span><span class="p">,</span>
+                  <span class="n">filename</span><span class="o">=</span><span class="sh">"</span><span class="s">A Small PDF.pdf</span><span class="sh">"</span><span class="p">,</span> <span class="n">disposition</span><span class="o">=</span><span class="sh">"</span><span class="s">attachment</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">smtplib</span><span class="p">.</span><span class="nc">SMTP</span><span class="p">(</span><span class="sh">"</span><span class="s">smtp.mailtrap.io</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2525</span><span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+    <span class="n">server</span><span class="p">.</span><span class="nf">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</code></pre></div></div> <p>So, we have two attachment here also with html body. The second attachment’s filename is shown because we did it manually.</p> <p><img src="../assets/images/emails-using-python/4.png" alt="Email with attachments.png"></p> <p>Further resources:</p> <ol> <li>https://blog.mailtrap.io/sending-emails-in-python-tutorial-with-code-examples/</li> <li>https://docs.python.org/3/library/email.contentmanager.html#email.contentmanager.ContentManager.set_content</li> <li>https://blog.mailtrap.io/sending-emails-in-python-tutorial-with-code-examples/</li> </ol> </body></html>

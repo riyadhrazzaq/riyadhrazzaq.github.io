@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"> <html><body> <h1 id="bayes-theroem">Bayes Theroem</h1> <p>Any naive bayes approach including Gaussian Naive Bayes depends on the Bayes Theorem. Bayes theorem gives us the probability of an event, given that we have some extra knowledge about that event.</p> \[P(A \mid B) = \frac{P(A) \ P(B \mid A)}{P(B)}\] <p>This is the mathmatical definition of the theorem. Here, \(A\) and \(B\) are events and \(P(B) \ne 0\)</p> <ul> <li>\(P(A \mid B)\) a conditional probability. It is read as the likelyhood of event A occuring given that event B is true. In an experiment this is our objective variable.</li> <li>\(P(A)\) is prior probability. We are supposed to observe the value of this in our experiment.</li> <li>\(P(B \mid A)\) is the conditional probability of B happening given A true.</li> </ul> <p>There is a rather intuitive explanation behind this legendary theroy.</p> <h2 id="smoke-and-fire-experiment">Smoke and Fire Experiment</h2> <p>Our hypothesis is that there will be fire if there is smoke. So, we are asking for \(P(Fire \mid Smoke)\). To answer that we’ll start with an experiment sample.</p> <p><img src="../assets/images/2020-07-03-gauss-naive-bayes/NB1.png" alt="NB1"></p> <p>When we collect data about <em>Fire</em> and <em>No Fire</em> events, the area of the white square represents the total sample space.</p> <p><img src="../assets/images/2020-07-03-gauss-naive-bayes/NB2.png" alt="NB2.png"></p> <p>And we see that we area on the left is <em>Fire</em> and on the right is <em>No Fire</em> samples.</p> <p><img src="../assets/images/2020-07-03-gauss-naive-bayes/NB3.png" alt="NB3.png"></p> <p>Now let’s observe in which samples smoke was seen in a fire, and in which sample smoke was seen even though there were no fire. Note that, smoke seen in a fire can be written as \((Smoke \mid Fire)\) and not seen in a fire can be written as \((Smoke \mid No Fire)\). Red areas represents smoke was seen. These red areas that I have drawn is based on gut feeling. Smoke is common when there’s a fire, so red area is bigger compared to the red area when there is no fire. Now, as we know probability of something happening is effectively the ratio of that thing against all other thing. Hence, \(P(Smoke \mid Fire)\) is equals to red area inside fire divided by total red are in experiment.</p> <p><img src="../assets/images/2020-07-03-gauss-naive-bayes/NB5.png" alt="NB5.png"></p> <p>But how the red areas can be calculated mathematically? Well, area is the product of height and width. In our experiment, height is the \(P(Smoke \mid Fire)\) and width is \(P(Fire)\). Similarly the red area in <em>No Fire</em> can be calculated.</p> <p><img src="../assets/images/2020-07-03-gauss-naive-bayes/NB6.png" alt="NB6%281%29.png"></p> <p>So, we finally get this equation on top.</p> <p>Note: This is just a geometrical explanation of Bayes Theorem. Gaussian Naive Bayes and other naive bayes algorithms differentiate themselves from this by how they calculate \(P(Smoke \mid Fire)\).</p> <h1 id="gaussian-naive-bayes">Gaussian Naive Bayes</h1> <p>This algorithm assumes likelyhoods of features are of gaussian distribution.</p> \[P(x_i \mid y) = \frac{1}{\sqrt{2\pi\sigma^2_y}} \exp\left(-\frac{(x_i - \mu_y)^2}{2\sigma^2_y}\right)\] <h1 id="implementation">Implementation</h1> <p>We need to calculate priors,\(P(A)\), mean \(\mu_y\) and standard deviation, \(\sigma_y\) of all features for each available classes in y. Then a function to crunch the above formula of \(P(x_i \mid y)\)</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">math</span>
+
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span> <span class="c1"># linear algebra
+</span><span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span> <span class="c1"># data processing, CSV file I/O (e.g. pd.read_csv)
+</span>
+<span class="kn">from</span> <span class="n">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_iris</span>
+<span class="kn">from</span> <span class="n">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="n">sklearn.naive_bayes</span> <span class="kn">import</span> <span class="n">GaussianNB</span>
+<span class="kn">from</span> <span class="n">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
+</code></pre></div></div> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">GaussNB</span><span class="p">:</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">
+        No params are needed for basic functionality.
+        </span><span class="sh">"""</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">_mean</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span> <span class="c1"># CHECKED
+</span>        <span class="sh">"""</span><span class="s">
+        Returns class probability for each 
+        </span><span class="sh">"""</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">classes_</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">argwhere</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">i</span><span class="p">).</span><span class="nf">flatten</span><span class="p">()</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">n_feats</span><span class="p">):</span>
+                <span class="n">mean</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span> <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="p">))</span>
+            <span class="n">mu</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean</span>
+        <span class="k">return</span> <span class="n">mu</span>
+    
+    <span class="k">def</span> <span class="nf">_stddev</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span> <span class="c1"># CHECKED
+</span>        <span class="n">sigma</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">classes_</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">argwhere</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">y</span><span class="o">==</span><span class="n">i</span><span class="p">).</span><span class="nf">flatten</span><span class="p">()</span>
+            <span class="n">stddev</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">n_feats</span><span class="p">):</span>
+                <span class="n">stddev</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span> <span class="n">np</span><span class="p">.</span><span class="nf">std</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span><span class="n">j</span><span class="p">])</span> <span class="p">)</span>
+            <span class="n">sigma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">stddev</span>
+        <span class="k">return</span> <span class="n">sigma</span>
+    
+    <span class="k">def</span> <span class="nf">_prior</span><span class="p">(</span><span class="n">self</span><span class="p">):</span> <span class="c1"># CHECKED
+</span>        <span class="sh">"""</span><span class="s">Prior probability, P(y) for each y
+        </span><span class="sh">"""</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">classes_</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">argwhere</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">y</span><span class="o">==</span><span class="n">i</span><span class="p">).</span><span class="nf">flatten</span><span class="p">().</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">probability</span> <span class="o">=</span> <span class="n">count</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">P</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">probability</span>
+        <span class="k">return</span> <span class="n">P</span>
+    
+    <span class="k">def</span> <span class="nf">_normal</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">mean</span><span class="p">,</span><span class="n">stddev</span><span class="p">):</span> <span class="c1"># CHECKED
+</span>        <span class="sh">"""</span><span class="s">
+        Gaussian Normal Distribution
+        $P(x_i \mid y) = </span><span class="se">\f</span><span class="s">rac{1}{\sqrt{2\pi\sigma^2_y}} \exp\left(-</span><span class="se">\f</span><span class="s">rac{(x_i - \mu_y)^2}{2\sigma^2_y}</span><span class="se">\r</span><span class="s">ight)$
+        </span><span class="sh">"""</span>
+        
+        <span class="n">multiplier</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">stddev</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span> 
+        <span class="n">exp</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="nf">float</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">stddev</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">multiplier</span> <span class="o">*</span> <span class="n">exp</span>
+
+    
+    <span class="k">def</span> <span class="nf">P_E_H</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">h</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">
+        Uses Normal Distribution to get, P(E|H) = P(E1|H) * P(E2|H) .. * P(En|H)
+        
+        params
+        ------
+        X: 1dim array. 
+            E in P(E|H)
+        H: class in y
+        </span><span class="sh">"""</span>
+        <span class="n">pdfs</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">n_feats</span><span class="p">):</span>
+            <span class="n">mu</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">means_</span><span class="p">[</span><span class="n">h</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">stddevs_</span><span class="p">[</span><span class="n">h</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">pdfs</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span> <span class="n">self</span><span class="p">.</span><span class="nf">_normal</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">mu</span><span class="p">,</span><span class="n">sigma</span><span class="p">)</span> <span class="p">)</span>
+            
+        <span class="n">p_e_h</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">prod</span><span class="p">(</span><span class="n">pdfs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p_e_h</span>
+        
+        
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">n_feats</span> <span class="o">=</span> <span class="n">X</span><span class="p">.</span><span class="n">shape</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">n_classes</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">unique</span><span class="p">(</span><span class="n">y</span><span class="p">).</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">classes_</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        
+        <span class="n">self</span><span class="p">.</span><span class="n">means_</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_mean</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="c1"># dict of list {class:feats}
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">stddevs_</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_stddev</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="c1"># dict of list {class:feat}
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">priors_</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_prior</span><span class="p">()</span> <span class="c1"># dict of priors 
+</span>        
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
+        <span class="n">samples</span><span class="p">,</span> <span class="n">feats</span> <span class="o">=</span> <span class="n">X</span><span class="p">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">samples</span><span class="o">!=</span><span class="n">self</span><span class="p">.</span><span class="n">n_samples</span> <span class="ow">or</span> <span class="n">feats</span><span class="o">!=</span><span class="n">self</span><span class="p">.</span><span class="n">n_feats</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">DimensionError</span><span class="p">(</span><span class="sh">"</span><span class="s">No dimension match with training data!</span><span class="sh">"</span><span class="p">)</span>
+            
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+            <span class="n">distinct_likelyhoods</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">classes_</span><span class="p">:</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nc">P_E_H</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">h</span><span class="p">)</span>
+                <span class="n">distinct_likelyhoods</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span> <span class="n">tmp</span> <span class="o">*</span> <span class="n">self</span><span class="p">.</span><span class="n">priors_</span><span class="p">[</span><span class="n">h</span><span class="p">])</span>
+            <span class="n">marginal</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">distinct_likelyhoods</span><span class="p">)</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">probas</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">classes_</span><span class="p">:</span>
+                <span class="n">numerator</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">priors_</span><span class="p">[</span><span class="n">h</span><span class="p">]</span> <span class="o">*</span> <span class="n">distinct_likelyhoods</span><span class="p">[</span><span class="n">tmp</span><span class="p">]</span>
+                <span class="n">denominator</span> <span class="o">=</span> <span class="n">marginal</span>
+                <span class="n">probas</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span> <span class="p">)</span>
+                <span class="n">tmp</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="c1"># predicting maximum
+</span>            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">probas</span><span class="p">)</span>
+            <span class="n">result</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">classes_</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">result</span>
+</code></pre></div></div> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nf">load_iris</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="nf">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div></div> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gnb</span> <span class="o">=</span> <span class="nc">GaussianNB</span><span class="p">()</span>
+<span class="n">sk_pred</span> <span class="o">=</span> <span class="n">gnb</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">).</span><span class="nf">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Sci-kit Learn: </span><span class="sh">"</span><span class="p">,</span><span class="nf">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="n">sk_pred</span><span class="p">))</span>
+
+<span class="n">nb</span> <span class="o">=</span> <span class="nc">GaussNB</span><span class="p">()</span>
+<span class="n">nb</span><span class="p">.</span><span class="nf">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span><span class="n">y_train</span><span class="p">)</span>
+<span class="n">me_pred</span> <span class="o">=</span> <span class="n">nb</span><span class="p">.</span><span class="nf">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Custom GaussNB: </span><span class="sh">"</span><span class="p">,</span><span class="nf">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="n">me_pred</span><span class="p">))</span>
+</code></pre></div></div> </body></html>

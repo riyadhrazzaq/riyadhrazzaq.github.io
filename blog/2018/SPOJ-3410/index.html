@@ -1,0 +1,12 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"> <html><body> <h2 id="problem-statement"><a href="http://www.spoj.com/problems/SAMER08F/" rel="external nofollow noopener" target="_blank">Problem Statement</a></h2> <h2 id="explanation">Explanation</h2> <p>How many squares a (4x4) square holds? the answer is-</p> <blockquote> <p>16 (1x1) squares + 4 (2x2) squares, 9 (3x3) squares, 1 (4x4) squares</p> </blockquote> <p>Meaning, the answer is \(n^2+(n-1)^2+(n-2)^2+...+1^2\) Which is equivalent to, <br> \(\sum_{i=1}^{n} i^2 = 1^2 + 2^2 + 3^2 +...+ n^2 = \frac{n(n+1)(2n+1)}{6}\)</p> <h2 id="solution">Solution</h2> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#include&lt;stdio.h&gt;
+int main()
+{
+    int n,x;
+    while(scanf("%d",&amp;n)&amp;&amp;n!=0)
+    {
+        x=(n*(n+1)*((2*n)+1))/6;
+        printf("%d\n",x);
+    }
+    return 0;
+}
+</code></pre></div></div> </body></html>
