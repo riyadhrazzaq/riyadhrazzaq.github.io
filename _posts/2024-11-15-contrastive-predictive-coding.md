@@ -1,7 +1,7 @@
 ---  
 layout: post
 date: 2024-11-15 00:01:13
-description: my notes on the paper \"Representation Learning with Contrastive Predictive Coding\" by Oord et al.
+description: my notes on the paper 'Representation Learning with Contrastive Predictive Coding' by Oord et al.
 tags: paper speech
 categories: machine-learning
 tabs: true

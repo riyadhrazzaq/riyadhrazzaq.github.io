@@ -1,6 +1,10 @@
 ---
+layout: post
 title: "Creating emails using EmailMessage in Python 3.8"
+date: 2020-09-26 00:01:13
+description: explaining permutation and combination with examples
 tags: python
+categories: code
 ---
 
 # Hello World in Email

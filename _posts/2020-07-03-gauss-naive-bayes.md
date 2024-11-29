@@ -1,8 +1,11 @@
 ---
+layout: post
 title: "Idea and Implementation / Bayes Theorem and Gaussian Naive Bayes"
-tags:
-    - machine learning
-    - implementation
+date: 2020-07-03 00:01:13
+description: visual explanation of Naive Bayes, inspired by 3Blue1Brown.
+tags: algorithm theory
+categories: machine-learning
+featured: true
 ---
 
 # Bayes Theroem
@@ -22,23 +25,24 @@ There is a rather intuitive explanation behind this legendary theroy.
 ## Smoke and Fire Experiment
 Our hypothesis is that there will be fire if there is smoke. So, we are asking for $$P(Fire \mid Smoke)$$. To answer that we'll start with an experiment sample. 
 
-![NB1](../assets/images/2020-07-03-gauss-naive-bayes/NB1.png)
+{% include figure.liquid max-width=800 loading="eager" path="assets/images/2020-07-03-gauss-naive-bayes/NB1.png" class="img-fluid z-depth-1" %}
+
 
 When we collect data about *Fire* and *No Fire* events, the area of the white square represents the total sample space. 
 
-![NB2.png](../assets/images/2020-07-03-gauss-naive-bayes/NB2.png)
+{% include figure.liquid max-width=800 loading="eager" path="assets/images/2020-07-03-gauss-naive-bayes/NB2.png" class="img-fluid z-depth-1" %}
 
 And we see that we area on the left is *Fire*  and on the right is *No Fire* samples. 
 
-![NB3.png](../assets/images/2020-07-03-gauss-naive-bayes/NB3.png)
+{% include figure.liquid max-width=800 loading="eager" path="assets/images/2020-07-03-gauss-naive-bayes/NB3.png" class="img-fluid z-depth-1" %}
 
 Now let's observe in which samples smoke was seen in a fire, and in which sample smoke was seen even though there were no fire. Note that, smoke seen in a fire can be written as $$(Smoke \mid Fire)$$ and not seen in a fire can be written as $$(Smoke \mid No Fire)$$. Red areas represents smoke was seen. These red areas that I have drawn is based on gut feeling. Smoke is common when there's a fire, so red area is bigger compared to the red area when there is no fire. Now, as we know probability of something happening is effectively the ratio of that thing against all other thing. Hence, $$P(Smoke \mid Fire)$$ is equals to red area inside fire divided by total red are in experiment. 
 
-![NB5.png](../assets/images/2020-07-03-gauss-naive-bayes/NB5.png)
+{% include figure.liquid max-width=800 loading="eager" path="assets/images/2020-07-03-gauss-naive-bayes/NB5.png" class="img-fluid z-depth-1" %}
 
 But how the red areas can be calculated mathematically? Well, area is the product of height and width. In our experiment, height is the $$P(Smoke \mid Fire)$$ and width is $$P(Fire)$$. Similarly the red area in *No Fire* can be calculated. 
 
-![NB6%281%29.png](../assets/images/2020-07-03-gauss-naive-bayes/NB6.png)
+{% include figure.liquid max-width=800 loading="eager" path="assets/images/2020-07-03-gauss-naive-bayes/NB6.png" class="img-fluid z-depth-1" %}
 
 So, we finally get this equation on top.
 
