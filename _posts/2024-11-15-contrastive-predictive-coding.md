@@ -6,7 +6,7 @@ tags: paper speech
 categories: machine-learning
 tabs: true
 title: "Paper Notes / Contrastive Predicting Coding"  
----  
+---
 This is an attempt to write down my understanding of the paper "[Representation Learning with Contrastive Predictive Coding" by Oord et al.](http://arxiv.org/abs/1807.03748)
 
 # Ultimate Goal
