@@ -3,12 +3,19 @@
 
 @string{aps = {American Physical Society,}}
 
-@inproceedings{abela2024uom,
-  title={UOM-Constrained IWSLT 2024 Shared Task Submission-Maltese Speech Translation},
-  author={Abela, Kurt and Riyadh, Md Abdur Razzaq and Galea, Melanie and Busuttil, Alana and Kovalev, Roman and Williams, Aiden and Borg, Claudia},
-  booktitle={Proceedings of the 21st International Conference on Spoken Language Translation (IWSLT 2024)},
-  pages={108--113},
-  year={2024}
+@inproceedings{riyadh-etal-2026-speechlm,
+  title = {SpeechLM for Automatic Speech Recognition in Low-resource Languages },
+  author = {Riyadh, Md Abdur Razzaq and Agirre, Eneko and Navas, Eva and Borg, Claudia},
+  booktitle = {Proceedings of Speech Language Models in Low-Resource Settings: Performance, Evaluation, and Bias Analysis (SPEAKABLE) @ LREC 2026},
+  month = {May},
+  year = {2026},
+  pages = {125--131},
+  address = {Palma, Mallorca, Spain},
+  publisher = {European Language Resources Association (ELRA)},
+  editor = {Hosseini-Kivanani, Nina and Brutti, Alessio and Matassoni, Marco and Dowerah, Sandipana and Liga, Davide and Schommer, Christoph},
+  doi = {10.63317/2634e2pv97js},
+  abstract = {Multi-modal Speech Language Models (SpeechLMs) are a recent advancement in natural language processing. These SpeechLMs are instruction-tuned and optimized for general tasks. Their usefulness for Automatic Speech Recognition (ASR), particularly in relatively low-resource scenarios, remains largely understudied. This work developed SpeechLM for ASR in Basque and Maltese and studied the impact of language-adapted Large Language Model (LLM) and speech encoder within the SpeechLM for ASR. Using supervised learning, we fine-tuned LLaMA-Omni, a SpeechLM, for ASR. We have conducted comprehensive hyperparameter tuning and experimented with language-adapted SpeechLM components to improve performance and evaluated our best models on in-distribution datasets for both languages and an out-of-distribution dataset for Basque. LLaMA-Omni achieved 8.09% WER in Basque and 25.65% WER for Maltese on average across multiple test splits. The in-distribution results show that SpeechLM outperforms a fine-tuned ASR system under specific constraints, whereas it underperforms the baseline model on out‑of‑distribution Basque, indicating weaker overall robustness. We also find that a language-adapted LLM within SpeechLM improves in out-of-distribution settings when compared to the off-the-shelf LLM within SpeechLM.},
+  selected={true}
 }
 
 @inproceedings{riyadh2024mela,
@@ -16,7 +23,8 @@
   author={Riyadh, Md Abdur Razzaq and Nabhani, Sara},
   booktitle={Proceedings of The Second Arabic Natural Language Processing Conference},
   pages={478--482},
-  year={2024}
+  year={2024},
+  selected={true}
 }
 
 @article{nabhani2024mela,
@@ -26,4 +34,11 @@
   year={2024}
 }
 
+@inproceedings{abela2024uom,
+  title={UOM-Constrained IWSLT 2024 Shared Task Submission-Maltese Speech Translation},
+  author={Abela, Kurt and Riyadh, Md Abdur Razzaq and Galea, Melanie and Busuttil, Alana and Kovalev, Roman and Williams, Aiden and Borg, Claudia},
+  booktitle={Proceedings of the 21st International Conference on Spoken Language Translation (IWSLT 2024)},
+  pages={108--113},
+  year={2024}
+}
 

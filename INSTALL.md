@@ -6,6 +6,8 @@
   - [Local setup on Windows](#local-setup-on-windows)
   - [Local setup using Docker (Recommended)](#local-setup-using-docker-recommended)
     - [Build your own docker image](#build-your-own-docker-image)
+  - [Local setup using Podman](#local-setup-using-podman)
+    - [SELinux](#selinux)
   - [Local Setup with Development Containers](#local-setup-with-development-containers)
   - [Local Setup (Legacy, no longer supported)](#local-setup-legacy-no-longer-supported)
   - [Deployment](#deployment)
@@ -74,6 +76,52 @@ $ docker compose up --build
 > If you want to update jekyll, install new ruby packages, etc., all you have to do is build the image again using `--force-recreate` argument at the end of the previous command! It will download Ruby and Jekyll and install all Ruby packages again from scratch.
 
 If you want to use a specific docker version, you can do so by changing `latest` tag to `your_version` in `docker-compose.yaml`. For example, you might have created your website on `v0.10.0` and you want to stick with that.
+
+## Local setup using Podman
+
+[Podman](https://podman.io/) runs the same pre-built image as Docker, without a daemon and without root. On Fedora and RHEL it is usually already available; otherwise install it along with `podman-compose`:
+
+```bash
+$ sudo dnf install podman podman-compose
+```
+
+`podman-compose` reads the existing `docker-compose.yml`, so the Docker instructions above translate directly:
+
+```bash
+$ podman-compose up
+```
+
+The site is then served at `http://127.0.0.1:8080`.
+
+> Prefer `127.0.0.1` over `localhost`. On hosts that resolve `localhost` to the IPv6 address `::1` first, the connection fails even though the container is running and the port is published.
+
+### SELinux
+
+If SELinux is in enforcing mode (check with `getenforce`), the bind mount of your repository into the container is blocked and Jekyll fails at startup with:
+
+```
+Couldn't watch _config.yml: Permission denied
+```
+
+There are two ways around it. The first is to relabel the mount by adding the `:z` flag to the volume in `docker-compose.yml`, after which `podman-compose up` works as-is:
+
+```yaml
+volumes:
+  - .:/srv/jekyll:z
+```
+
+Note that this permanently rewrites the SELinux labels of your source directory, and that the modified `docker-compose.yml` is tracked by git.
+
+The second leaves both the file and the labels untouched, by running the container directly with SELinux labeling disabled for it:
+
+```bash
+$ podman run --rm --name alfolio --security-opt label=disable \
+    -p 8080:8080 -p 35729:35729 \
+    -v "$PWD":/srv/jekyll -e JEKYLL_ENV=development \
+    docker.io/amirpourmand/al-folio:v0.12.1
+```
+
+Stop it with `podman stop alfolio`. As with `docker compose`, the container watches your files and rebuilds automatically, and it restarts Jekyll by itself when `_config.yml` changes.
 
 ## Local Setup with Development Containers
 
