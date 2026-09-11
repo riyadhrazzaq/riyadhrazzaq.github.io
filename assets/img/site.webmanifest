@@ -1,0 +1,19 @@
+{
+  "name": "Md Abdur Razzaq Riyadh",
+  "short_name": "Riyadh",
+  "icons": [
+    {
+      "src": "/assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#16150F",
+  "background_color": "#16150F",
+  "display": "browser"
+}
