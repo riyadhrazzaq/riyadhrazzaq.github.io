@@ -87,7 +87,7 @@ with smtplib.SMTP("smtp.mailtrap.io", 2525) as server:
 ```
 
 Message sent!
-![Screenshot_2020-09-26 Mailtrap - Safe Email Testing.png](../assets/images/emails-using-python/0.png)
+![Screenshot_2020-09-26 Mailtrap - Safe Email Testing.png](/assets/images/emails-using-python/0.png)
 
 To do this with gmail or microsoft, we just need to change our username, password, host and port with their given configs which is available online.
 
@@ -138,8 +138,8 @@ with smtplib.SMTP("smtp.mailtrap.io", 2525) as server:
 
 Result:
 
-![Screenshot_2020-09-26 Mailtrap - Safe Email Testing(1).png](../assets/images/emails-using-python/1.png)
-![Screenshot_2020-09-26 Mailtrap - Safe Email Testing(6).png](../assets/images/emails-using-python/6.png)
+![Screenshot_2020-09-26 Mailtrap - Safe Email Testing(1).png](/assets/images/emails-using-python/1.png)
+![Screenshot_2020-09-26 Mailtrap - Safe Email Testing(6).png](/assets/images/emails-using-python/6.png)
 
 Those random seeming string is the image as binary placed inline. But not parsed and presented in color. HTML can do that. We will read the image as byte stream and insert that into the `src` of html `<img>` tag.
 
@@ -173,7 +173,7 @@ with smtplib.SMTP("smtp.mailtrap.io", 2525) as server:
 
 as we see the long line of text via `set_content` was not shown. Only the HTML is shown. This type of message is known as `multipart/alternative`, where main content will be in plain text and alternative graphically rich version will be put inside html. 
 
-![Screenshot_2020-09-26 Mailtrap - Safe Email Testing(3).png](../assets/images/emails-using-python/3.png)
+![Screenshot_2020-09-26 Mailtrap - Safe Email Testing(3).png](/assets/images/emails-using-python/3.png)
 
 The same thing can be done with `MIMEPart` method too.
 
@@ -262,7 +262,7 @@ with smtplib.SMTP("smtp.mailtrap.io", 2525) as server:
 
 So, we have two attachment here also with html body. The second attachment's filename is shown because we did it manually.
 
-![Email with attachments.png](../assets/images/emails-using-python/4.png)
+![Email with attachments.png](/assets/images/emails-using-python/4.png)
 
 Further resources:
 1. https://blog.mailtrap.io/sending-emails-in-python-tutorial-with-code-examples/

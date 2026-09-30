@@ -1,5 +1,5 @@
 ---
-Title: "Minimum Moves for Balancing Brackets"
+title: "Minimum Moves for Balancing Brackets"
 comments: True
 ---
 ## Problem Definition
