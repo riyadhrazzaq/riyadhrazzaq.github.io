@@ -9,9 +9,6 @@ giscus_comments: false
 ---
 
 # Notation
-
-Everything below — prose, equations and code — uses one set of symbols.
-
 - $N$ is the batch size, $C$ the number of classes (the vocab size for an LLM), $T$ the sequence length.
 - $n$, $c$, $t$ are the corresponding indices.
 - $L$ is always the loss, never a length.
